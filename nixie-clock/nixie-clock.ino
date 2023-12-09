@@ -108,8 +108,6 @@ void setup() {
   pinMode(pins::kIndicatorPin, OUTPUT);
 }
 
-uint32_t counter = 0;
-unsigned long last_increment_time = 0;
 unsigned long last_step_time = 0;
 
 void loop() {
@@ -130,20 +128,12 @@ void loop() {
     last_step_time = curr_time;
   }
 
-  if (curr_time - last_increment_time > 1'000) {
-    counter += 1;
-    uint8_t temp_counter = counter;
+  digits[0] = timekeeper.getHour() / 10;
+  digits[1] = timekeeper.getHour() % 10;
+  digits[2] = timekeeper.getMinute() / 10;
+  digits[3] = timekeeper.getMinute() % 10;
 
-    int divisor = 1000;
-    for (int i = 0; i < constants::kNumDigits; i++) {
-      digits[i] = temp_counter / divisor;
-      temp_counter -= digits[i] * divisor;
-      divisor /= 10;
-    }
-
-    nixies.setDigits(digits);
-    last_increment_time = curr_time;
-  }
+  nixies.setDigits(digits);
 
   delay(constants::kMeasurementPeriodMs);
 }
