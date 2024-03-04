@@ -390,6 +390,10 @@
     [
       "a2995ad3-9316-4aa1-8617-bc9f94d1b5b9",
       "Boost Converter"
+    ],
+    [
+      "e06bb887-3cde-41f1-bd10-02282575e098",
+      "Buck Converter"
     ]
   ],
   "text_variables": {}

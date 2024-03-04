@@ -670,6 +670,14 @@
     (uuid b969dd42-56df-4788-a3d2-1f0d4388791e)
   )
 
+  (text_box "Ideally, this should be a pullup network instead of a pulldown since the NMOS transistor being on for long periods of time could damage the transistor since it presents as a short to ground."
+    (at 19.05 86.36 0) (size 40.64 15.24)
+    (stroke (width 0) (type default))
+    (fill (type none))
+    (effects (font (size 1.27 1.27)) (justify left top))
+    (uuid 367833ab-4c95-4b42-ac4b-ff4426869098)
+  )
+
   (hierarchical_label "V_{fdbk}" (shape input) (at 133.35 71.12 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 0e397d0c-ded3-4f87-a753-9cd5111800dc)
