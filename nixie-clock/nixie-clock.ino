@@ -20,7 +20,8 @@ constexpr pin_size_t kDataPin = D8;
 constexpr pin_size_t kPwmPin = D9;
 
 // Built in LED pin
-constexpr pin_size_t kIndicatorPin = D13;
+constexpr pin_size_t kIndicatorPin = D10;
+constexpr pin_size_t kHighVoltagePin = D11;
 
 // HV513 Bank GPI
 constexpr pin_size_t kShortDetect = D6;
@@ -30,6 +31,8 @@ constexpr auto kVoutPin = A0;
 } // namespace pins
 
 namespace constants {
+constexpr auto kSafeVoltage = 10;
+
 constexpr unsigned int kAdcBits = 12;
 constexpr float kAdcRef = 1 << kAdcBits;
 constexpr float kVref = 3.3;
@@ -38,7 +41,8 @@ constexpr float kDividerInv = (1'000'000 + 10'000) / 10'000;
 constexpr float kFeedbackAlpha = 0.1;
 
 // Operating point
-constexpr float kVout = 140;
+constexpr float kVout = 155;
+constexpr float kVin = 45;
 
 // Controller Settings
 constexpr auto kControllerPeriodMs = 100;
@@ -116,16 +120,38 @@ void loop() {
   ble.step();
   timekeeper.step(curr_time, ble.connected());
 
-  converter.readVoltage();
+  // Read the voltage every step to keep the converter memory up to date.
+  auto latest_voltage = converter.readVoltage();
   if (curr_time - last_step_time > constants::kControllerPeriodMs) {
-    if (converter.state() == MbedStepBoostConverter::State::kDiverged) {
+    if (latest_voltage < constants::kSafeVoltage) {
+      digitalWrite(pins::kHighVoltagePin, LOW);
+    } else {
+      digitalWrite(pins::kHighVoltagePin, HIGH);
+    }
+
+    if (converter.state() == MbedStepBoostConverter::State::kIdle) {
       digitalWrite(pins::kIndicatorPin, HIGH);
+      
+      // When idle, start the converter when the input voltage is present at
+      // the output and enough time has passed.
+      if (latest_voltage > constants::kVin) {
+        converter.step(curr_time);
+        last_step_time = curr_time;
+      }
+    } else if (converter.state() == MbedStepBoostConverter::State::kDiverged) {
+      digitalWrite(pins::kIndicatorPin, HIGH);
+
+      // Idle the converter once the capacitor has discharged beyond the input
+      // voltage. Once the input voltage is again present at the output, the
+      // converter will automatically restart.
+      if (latest_voltage < constants::kVin) {
+        converter.reset();
+      }
     } else {
       converter.step(curr_time);
       digitalWrite(pins::kIndicatorPin, LOW);
+      last_step_time = curr_time;
     }
-
-    last_step_time = curr_time;
   }
 
   digits[0] = timekeeper.getHour() / 10;
