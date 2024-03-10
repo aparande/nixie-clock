@@ -31,7 +31,7 @@ constexpr auto kVoutPin = A0;
 } // namespace pins
 
 namespace constants {
-constexpr auto kSafeVoltage = 10;
+constexpr auto kSafeVoltage = 15;
 
 constexpr unsigned int kAdcBits = 12;
 constexpr float kAdcRef = 1 << kAdcBits;
@@ -41,7 +41,7 @@ constexpr float kDividerInv = (1'000'000 + 10'000) / 10'000;
 constexpr float kFeedbackAlpha = 0.1;
 
 // Operating point
-constexpr float kVout = 155;
+constexpr float kVout = 170;
 constexpr float kVin = 45;
 
 // Controller Settings
