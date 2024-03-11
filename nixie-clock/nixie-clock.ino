@@ -5,6 +5,7 @@
 #include "mbed.h"
 #include "nixie_driver.h"
 #include "timekeeper.h"
+#include "scrambler.h"
 
 namespace pins {
 // HV513 Bank GPO
@@ -96,6 +97,9 @@ NixieDriver nixies{bank, constants::kNumDigits};
 BleManager ble;
 Timekeeper timekeeper{ble.time_service()};
 
+uint8_t ic_buffer_[constants::kNumDigits] = {0};
+Scrambler scrambler{constants::kNumDigits, ic_buffer_};
+
 uint8_t digits[constants::kNumDigits] = {0};
 
 void setup() {
@@ -158,6 +162,8 @@ void loop() {
   digits[1] = timekeeper.getHour() % 10;
   digits[2] = timekeeper.getMinute() / 10;
   digits[3] = timekeeper.getMinute() % 10;
+
+  scrambler.step(curr_time, digits);
 
   nixies.setDigits(digits);
 
